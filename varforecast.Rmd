@@ -1,0 +1,59 @@
+---
+title: "VAR Forecast and Analysis"
+author: "Andrew Lee"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Variables chosen: Log(GDPI), Unemployment Rate, interest rates of 3-month T-Bill
+
+```{r}
+library(readxl)
+sims <- read_excel("/home/andrew/Documents/timeseries/VAR/data1.xls")
+library(vars)
+```
+
+```{r}
+x <- sims[,4:6]
+y <- ts(data = x, start = c(1958,1), frequency = 4, end = c(2020,4)) # data start in 1958Q1 and end in 2020Q4.
+#y 
+```
+
+## VAR Model using 3 year's Data
+
+```{r}
+var1 <- VAR(y, p=4) 
+summary(var1)
+```
+
+### Impies Graphs
+
+```{r}
+impies <- irf(var1, n.ahead=12)
+plot(impies)
+```
+
+
+## Impies Analysis
+### Unemployment
+A shock to unemployment has no impact on Log(GDPI) (or my axis is wrong). A shock has a slight negative impact on interest rates. This intuitively makes sense as interest rates are usually lowered in times of financial depression. Unemployment rate stays high and then starts to decrease after 3 lags.
+
+### Interest Rates
+A shock to interest rates has a slight inverse effect on unemployment. This is probably correlation instead of causation, but makes intuitive sense. Interest rates seem to steadily, but slowly decline after a shock. Again, no impact on LGDPI. Interest rates increased dramatically and slowly declined after around 4 lags.
+
+### Log(GDPI)
+A shock to GDPI causes unemployment to decrease. This makes intuitive sense, one investment a business can make is hiring more employees or starting projects which need workers. Interest Rates increase slightly, and reach their peak around 5 lags and slowly decline. This makes somewhat sense, but I'm surprised the effect does not happen soon. Again the scale of the graph makes it difficult to tell what's happening to Log(GDPI).
+
+```{r}
+fcst1 <- predict(var1, n.ahead = 12)
+plot(fcst1)
+fcst1
+```
+
+### Forecasts
+Interest rates seem to remain steady. This makes a lot of sense and is probably accurate based on recent FED policy. Unemployment took a large hit from 2020, but is on a decline at a decreasing rate, this makes sense after the sharp decline due to the COVID increase. Log(GDPI) continues to rise slightly.
+
